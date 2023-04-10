@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1022486368061",
+    "project_id": "tfginigocarrate",
+    "storage_bucket": "tfginigocarrate.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1022486368061:android:af8a81c095c77c698aff54",
+        "android_client_info": {
+          "package_name": "com.inigo.organizeme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1022486368061-9comhfimaimn5q02s5akr22e11d2jhq6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIbFnwO2w202YkSj1ds8g5zDag7WXXkTE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1022486368061-9comhfimaimn5q02s5akr22e11d2jhq6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
