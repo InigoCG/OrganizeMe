@@ -19,7 +19,6 @@ private lateinit var db: DatabaseReference
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         analytics = Firebase.analytics
-        db = Firebase.database.reference
         super.onCreate(savedInstanceState)
         setContent {
             AppNavegacion()

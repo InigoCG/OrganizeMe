@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.inigo.organizeme.MainActivity
 import com.inigo.organizeme.R
+import com.inigo.organizeme.codigo.escribirUsuariosDB
 import com.inigo.organizeme.ui.theme.OrganizeMeTheme
 import java.util.regex.Pattern
 
@@ -226,15 +227,15 @@ fun BotonRegistro(
             if (nombre.isBlank() || email.isBlank() || password.isBlank() || repeatPassword.isBlank()) {
                 Toast.makeText(context, "Campos vacíos", Toast.LENGTH_SHORT).show()
             } else {
-                if (!validarEmail(email)) {
+                if (!validarEmail(email.trim())) {
                     Toast.makeText(context, "Formato email incorrecto", Toast.LENGTH_SHORT).show()
-                } else if (password.length < 5) {
+                } else if (password.trim().length < 5) {
                     Toast.makeText(context, "Contraseña demasiado corta", Toast.LENGTH_SHORT).show()
-                } else if (repeatPassword != password) {
+                } else if (repeatPassword.trim() != password.trim()) {
                     Toast.makeText(context, "Las contraseñas no son iguales", Toast.LENGTH_SHORT)
                         .show()
                 } else {
-
+                    escribirUsuariosDB(nombre, email, password)
 
                     Toast.makeText(context, "Usuario registrado", Toast.LENGTH_SHORT).show()
                     navController.popBackStack()
