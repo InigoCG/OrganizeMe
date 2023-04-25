@@ -1,8 +1,7 @@
 package com.inigo.organizeme.codigo
 
 import androidx.compose.ui.platform.LocalContext
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
@@ -20,18 +19,54 @@ fun escribirUsuariosDB(nombre: String, email: String, password: String) {
     }
 }
 
-fun leerEmailUsuariosDB(email: String) {
+fun filtrarUsuariosEmail(email: String): Boolean {
+    var resultado: Boolean = false
     try {
-        db = FirebaseDatabase.getInstance("https://tfginigocarrate-default-rtdb.europe-west1.firebasedatabase.app").reference
+        db = FirebaseDatabase.getInstance("https://tfginigocarrate-default-rtdb.europe-west1.firebasedatabase.app").getReference("usuarios")
 
-        db.child("usuarios").get().addOnSuccessListener {
-            for (usuario in it.children) {
-                /*if (usuario) {
+//        db.child("usuarios").get().addOnSuccessListener {
+//            for (usuario in it.children) {
+//
+//            }
+//        }
 
-                }*/
+        val filtrado = leerListaUsuarios()
+
+        for (i in filtrado) {
+            if (i.email.contains(email)) {
+                resultado = true
             }
         }
     } catch (exception: Exception) {
         //TODO Hacer un cambio de actividad o un Toast
     }
+    return resultado
+}
+
+fun leerListaUsuarios(): ArrayList<Usuario> {
+    var listaUsuarios = ArrayList<Usuario>()
+    try {
+        db = FirebaseDatabase.getInstance("https://tfginigocarrate-default-rtdb.europe-west1.firebasedatabase.app").getReference("usuarios")
+
+        db.addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (i in snapshot.children) {
+                        val usuario = i.getValue(Usuario :: class.java)
+                        if (usuario != null) {
+                            listaUsuarios.add(usuario)
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+        })
+    } catch (exception: Exception) {
+        //TODO Hacer un cambio de actividad o un Toast
+    }
+    return listaUsuarios
 }
