@@ -22,9 +22,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.inigo.organizeme.MainActivity
 import com.inigo.organizeme.R
 import com.inigo.organizeme.codigo.escribirUsuariosDB
+import com.inigo.organizeme.codigo.registrarUsuarios
 import com.inigo.organizeme.ui.theme.OrganizeMeTheme
 import java.util.regex.Pattern
 
@@ -229,16 +229,14 @@ fun BotonRegistro(
             } else {
                 if (!validarEmail(email.trim())) {
                     Toast.makeText(context, "Formato email incorrecto", Toast.LENGTH_SHORT).show()
-                } else if (password.trim().length < 5) {
-                    Toast.makeText(context, "Contraseña demasiado corta", Toast.LENGTH_SHORT).show()
+                } else if (!validarPassword(password.trim())) {
+                    Toast.makeText(context, "Formato contraseña incorrecto", Toast.LENGTH_SHORT).show()
                 } else if (repeatPassword.trim() != password.trim()) {
                     Toast.makeText(context, "Las contraseñas no son iguales", Toast.LENGTH_SHORT)
                         .show()
                 } else {
                     escribirUsuariosDB(nombre, email, password)
-
-                    Toast.makeText(context, "Usuario registrado", Toast.LENGTH_SHORT).show()
-                    navController.popBackStack()
+                    registrarUsuarios(context, navController, email, password)
                 }
             }
         },
@@ -253,6 +251,15 @@ fun validarEmail(email: String): Boolean {
         "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}\$"
     )
     val matcher = pattern.matcher(email)
+
+    return matcher.matches()
+}
+
+fun validarPassword(password: String): Boolean {
+    val pattern = Pattern.compile(
+        "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#\$%^&+=]).{6,20}\$"
+    )
+    val matcher = pattern.matcher(password)
 
     return matcher.matches()
 }

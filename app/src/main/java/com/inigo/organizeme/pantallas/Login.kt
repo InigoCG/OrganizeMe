@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.inigo.organizeme.R
 import com.inigo.organizeme.codigo.filtrarUsuariosEmail
+import com.inigo.organizeme.codigo.login
 import com.inigo.organizeme.navegacion.AppPantallas
 import com.inigo.organizeme.ui.theme.OrganizeMeTheme
 
@@ -156,16 +157,18 @@ fun BotonLogin(email: String, password: String, context: Context, navController:
             if (email.isBlank() || password.isBlank()) {
                 Toast.makeText(context, "Campos vacíos", Toast.LENGTH_SHORT).show()
             } else {
-                var resultadoEmail = filtrarUsuariosEmail(email)
+//                var resultadoEmail = filtrarUsuariosEmail(email)
+//
+//                if (resultadoEmail) {
+//                    Toast.makeText(context, "Email correcto", Toast.LENGTH_SHORT).show()
+//                } else {
+//                    Toast.makeText(context, "Email incorrecto", Toast.LENGTH_SHORT).show()
+//                }
+//
+//                navController.popBackStack()
+//                navController.navigate(AppPantallas.PantallaPrincipal.ruta)
 
-                if (resultadoEmail) {
-                    Toast.makeText(context, "Email correcto", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, "Email incorrecto", Toast.LENGTH_SHORT).show()
-                }
-
-                navController.popBackStack()
-                navController.navigate(AppPantallas.PantallaPrincipal.ruta)
+                login(context, navController, email, password)
             }
         },
         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
