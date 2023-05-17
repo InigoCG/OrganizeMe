@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
@@ -23,13 +24,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.inigo.organizeme.R
-import com.inigo.organizeme.codigo.filtrarUsuariosEmail
+import com.inigo.organizeme.codigo.SharedViewModel
 import com.inigo.organizeme.codigo.login
 import com.inigo.organizeme.navegacion.AppPantallas
 import com.inigo.organizeme.ui.theme.OrganizeMeTheme
 
 @Composable
-fun ContenidoLogin(navController: NavController) {
+fun ContenidoLogin(navController: NavController, sharedViewModel: SharedViewModel) {
 
     val context = LocalContext.current
 
@@ -114,7 +115,7 @@ fun ContenidoLogin(navController: NavController) {
                 }
             }
 
-            BotonLogin(email, password, context, navController)
+            BotonLogin(email, password, context, navController, sharedViewModel)
 
             Divider(
                 modifier = Modifier.padding(top = 100.dp),
@@ -150,7 +151,13 @@ fun ImageLogoLogin() {
 }
 
 @Composable
-fun BotonLogin(email: String, password: String, context: Context, navController: NavController) {
+fun BotonLogin(
+    email: String,
+    password: String,
+    context: Context,
+    navController: NavController,
+    sharedViewModel: SharedViewModel
+) {
     Button(
         modifier = Modifier.padding(top = 70.dp),
         onClick = {
@@ -168,7 +175,7 @@ fun BotonLogin(email: String, password: String, context: Context, navController:
 //                navController.popBackStack()
 //                navController.navigate(AppPantallas.PantallaPrincipal.ruta)
 
-                login(context, navController, email, password)
+                login(context, navController, email, password, sharedViewModel)
             }
         },
         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)

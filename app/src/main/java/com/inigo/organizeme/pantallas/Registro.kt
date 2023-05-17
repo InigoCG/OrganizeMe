@@ -33,6 +33,8 @@ fun ContenidoRegistro(navController: NavController) {
 
     val context = LocalContext.current
 
+
+
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -235,7 +237,7 @@ fun BotonRegistro(
                     Toast.makeText(context, "Las contraseñas no son iguales", Toast.LENGTH_SHORT)
                         .show()
                 } else {
-                    escribirUsuariosDB(nombre, email, password)
+                    escribirUsuariosDB(email, nombre)
                     registrarUsuarios(context, navController, email, password)
                 }
             }
@@ -263,3 +265,4 @@ fun validarPassword(password: String): Boolean {
 
     return matcher.matches()
 }
+

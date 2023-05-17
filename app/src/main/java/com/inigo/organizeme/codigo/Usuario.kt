@@ -1,18 +1,12 @@
 package com.inigo.organizeme.codigo
 
-class Usuario {
+class Usuario(
+    val email: String? = "",
+    val nombre: String? = "",
+    var listaTareas: MutableList<ListaTareas>? = mutableListOf(
+        ListaTareas("Tareas predeterminadas 1"),
+        ListaTareas("Tareas predeterminadas 2"),
+        ListaTareas("Tareas predeterminadas 3"),
+        )
+)
 
-    var nombre: String = ""
-    var email: String = ""
-    var password: String = ""
-
-    constructor(nombre: String, email: String, password: String) {
-        this.nombre = nombre
-        this.email = email
-        this.password = password
-    }
-    constructor() {
-
-    }
-
-}

@@ -8,9 +8,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import com.inigo.organizeme.codigo.Usuario
 import com.inigo.organizeme.navegacion.AppNavegacion
 
 private lateinit var analytics: FirebaseAnalytics
