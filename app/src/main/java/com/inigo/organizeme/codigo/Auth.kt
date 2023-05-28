@@ -53,7 +53,6 @@ fun login(
                         .getReference("usuarios")
                 db.child(email.replace('.', '-')).get().addOnSuccessListener {
                     val map: HashMap<String, Any> = it.value as HashMap<String, Any>
-                    val formatter = SimpleDateFormat("dd-MM-yyyy")
                     var listaValores: MutableList<ListaTareas>? = null
                     if (map.get("listaTareas") != null) {
                         val listAux = map.get("listaTareas") as MutableList<Any>
@@ -72,7 +71,7 @@ fun login(
                                     var tareas = Tarea(
                                         auxTareas.get("nombre").toString(),
                                         auxTareas.get("descripcion").toString(),
-                                        formatter.parse(auxTareas.get("fecha").toString())
+                                        auxTareas.get("fecha").toString()
                                     )
                                     listaValoresTareas.add(tareas)
                                 }
@@ -144,7 +143,8 @@ fun escribirDatosListaTareas(datosUsuario: Usuario, listaTareas: ListaTareas, in
             datosUsuario.listaTareas
         )
 
-        db.child("usuarios").child(usuario.email!!.replace('.', '-')).child("listaTareas").setValue(listaTareas)
+        db.child("usuarios").child(usuario.email!!.replace('.', '-')).child("listaTareas")
+            .child(index.toString()).child("tareas").setValue(listaTareas.tareas)
     } catch (exception: Exception) {
         //TODO Hacer un cambio de actividad o un Toast
     }

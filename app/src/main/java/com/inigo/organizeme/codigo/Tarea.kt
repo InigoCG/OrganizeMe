@@ -1,9 +1,9 @@
 package com.inigo.organizeme.codigo
 
-import java.util.Date
+import java.time.LocalDateTime
 
 class Tarea(
     val nombre: String? = "",
     val descripcion: String? = "",
-    val fecha: Date? = null
+    val fecha: String? = ""
 )

@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -39,10 +40,13 @@ import com.inigo.organizeme.codigo.Usuario
 import com.inigo.organizeme.codigo.escribirDatosListaTareas
 import com.inigo.organizeme.ui.theme.OrganizeMeTheme
 import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.datetime.date.DatePickerDefaults
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.datetime.time.TimePickerDefaults
 import com.vanpra.composematerialdialogs.datetime.time.timepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -121,7 +125,6 @@ fun contenidoListaTareas(
                     listaTareas.tareas = mutableListOf()
                 }
                 if (!listaTareas.tareas?.isEmpty()!!) {
-                    System.err.println("dentro del if")
                     for (tarea in listaTareas.tareas!!) {
                         listasDeTareas(tarea, openDialog, context, listaTareas, usuario, index)
                     }
@@ -181,12 +184,15 @@ fun GestionarTarea(
     var nombreTarea by remember { mutableStateOf(/*tarea.nombre*/ "") }
     var descripcionTarea by remember { mutableStateOf("") }
 
+    var fechaElegida by remember { mutableStateOf(false) }
+    var horaElegida by remember { mutableStateOf(false) }
+
     var pickedDate by remember {
         mutableStateOf(LocalDate.now())
     }
     val formatterDate by remember {
         derivedStateOf {
-            DateTimeFormatter.ofPattern("MMM dd yyyy").format(pickedDate)
+            DateTimeFormatter.ofPattern("yyyy-MM-dd").format(pickedDate)
         }
     }
     var pickedTime by remember {
@@ -214,7 +220,6 @@ fun GestionarTarea(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-
             TextField(
                 value = nombreTarea,
                 onValueChange = { nombreTarea = it },
@@ -223,14 +228,15 @@ fun GestionarTarea(
                         text = "Nombre", color = MaterialTheme.colors.onBackground
                     )
                 },
-                modifier = Modifier.background(MaterialTheme.colors.onSecondary),
+                modifier = Modifier
+                    .background(MaterialTheme.colors.onSecondary),
                 colors = TextFieldDefaults.textFieldColors(
                     focusedIndicatorColor = MaterialTheme.colors.primaryVariant,
                     cursorColor = MaterialTheme.colors.primaryVariant,
                     textColor = MaterialTheme.colors.onBackground
                 )
             )
-
+            Spacer(modifier = Modifier.padding(bottom = 5.dp))
             TextField(
                 value = descripcionTarea,
                 onValueChange = { descripcionTarea = it },
@@ -246,24 +252,25 @@ fun GestionarTarea(
                     textColor = MaterialTheme.colors.onBackground
                 )
             )
-
+            Spacer(modifier = Modifier.padding(bottom = 15.dp))
             Button(onClick = {
                 dateDialogState.show()
             }) {
-                Text(text = "Selecciona una fecha")
+                Text(text = "Selecciona una fecha", color = MaterialTheme.colors.onSecondary)
             }
-
+            Spacer(modifier = Modifier.padding(bottom = 10.dp))
             Button(onClick = {
                 timeDialogState.show()
             }) {
-                Text(text = "Selecciona una hora")
+                Text(text = "Selecciona una hora", color = MaterialTheme.colors.onSecondary)
             }
         }
 
         MaterialDialog(dialogState = dateDialogState, properties = DialogProperties(
             dismissOnBackPress = true, dismissOnClickOutside = true
-        ), buttons = {
+        ), backgroundColor = MaterialTheme.colors.onSecondary, buttons = {
             positiveButton(text = "CONFIRMAR") {
+                fechaElegida = true
                 Toast.makeText(context, "fecha asignada", Toast.LENGTH_SHORT).show()
             }
             negativeButton(text = "CANCELAR")
@@ -271,14 +278,23 @@ fun GestionarTarea(
             datepicker(
                 initialDate = LocalDate.now(),
                 title = "FECHA",
+                colors = DatePickerDefaults.colors(
+                    headerBackgroundColor = MaterialTheme.colors.primaryVariant,
+                    headerTextColor = MaterialTheme.colors.onSecondary,
+                    dateActiveBackgroundColor = MaterialTheme.colors.primary,
+                    dateActiveTextColor = MaterialTheme.colors.onSecondary,
+                    dateInactiveTextColor = MaterialTheme.colors.onBackground,
+                    calendarHeaderTextColor = MaterialTheme.colors.primary
+                )
             ) {
                 pickedDate = it
             }
         }
         MaterialDialog(dialogState = timeDialogState, properties = DialogProperties(
             dismissOnBackPress = true, dismissOnClickOutside = true
-        ), buttons = {
+        ), backgroundColor = MaterialTheme.colors.onSecondary, buttons = {
             positiveButton(text = "CONFIRMAR") {
+                horaElegida = true
                 Toast.makeText(context, "Hora asignada", Toast.LENGTH_SHORT).show()
             }
             negativeButton(text = "CANCELAR")
@@ -286,6 +302,15 @@ fun GestionarTarea(
             timepicker(
                 initialTime = LocalTime.NOON,
                 title = "HORA",
+                colors = TimePickerDefaults.colors(
+                    activeTextColor = MaterialTheme.colors.onSecondary,
+                    activeBackgroundColor = MaterialTheme.colors.primary,
+                    inactiveBackgroundColor = MaterialTheme.colors.primaryVariant,
+                    inactiveTextColor = MaterialTheme.colors.onSecondary,
+                    selectorTextColor = MaterialTheme.colors.onSecondary,
+                    inactivePeriodBackground = MaterialTheme.colors.secondary,
+                    selectorColor = MaterialTheme.colors.primary
+                )
             ) {
                 pickedTime = it
             }
@@ -293,12 +318,26 @@ fun GestionarTarea(
     }, confirmButton = {
         Button(
             onClick = {
-                if (comprobarNombreLista(nombreTarea)) {
+                if (comprobarNombreLista(nombreTarea) && fechaElegida && horaElegida) {
                     openDialog.value = false
-                    listaTareas.tareas?.add(Tarea(nombreTarea, descripcionTarea))
+                    fechaElegida = false
+                    horaElegida = false
+
+                    val fecha: LocalDate = LocalDate.parse(formatterDate)
+                    val hora: LocalTime = LocalTime.parse(formatterTime)
+                    val tiempo: LocalDateTime = LocalDateTime.of(fecha, hora)
+                    val formatter: DateTimeFormatter =
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm")
+                    val tiempoFormateado: String = tiempo.format(formatter)
+
+                    listaTareas.tareas?.add(
+                        Tarea(
+                            nombreTarea,
+                            descripcionTarea,
+                            tiempoFormateado
+                        )
+                    )
                     escribirDatosListaTareas(usuario, listaTareas, index)
-                    // usuario?.listaTareas?.add(ListaTareas(nombreTarea))
-                    // escribirDatosUsuario(usuario!!)
                     Toast.makeText(context, "Lista creada", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(context, "Campo vacío", Toast.LENGTH_SHORT).show()
