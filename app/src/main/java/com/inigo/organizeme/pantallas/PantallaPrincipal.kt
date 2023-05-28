@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.inigo.organizeme.codigo.*
+import com.inigo.organizeme.navegacion.AppPantallas
 import com.inigo.organizeme.ui.theme.OrganizeMeTheme
 
 @Composable
@@ -66,21 +67,28 @@ fun PantallaPrincipal(navController: NavController, sharedViewModel: SharedViewM
                     .padding(it),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                contenido(usuario)
+                var estado by remember { mutableStateOf(usuario?.listaTareas) }
+                contenido(usuario, sharedViewModel, navController)
             }
         }
     }
 }
 
 @Composable
-fun contenido(usuario: Usuario?) {
+fun contenido(usuario: Usuario?, sharedViewModel: SharedViewModel, navController: NavController) {
     LazyColumn(modifier = Modifier.padding(top = 10.dp)) {
         item {
             if (usuario != null) {
+                if (usuario.listaTareas == null) {
+                    usuario.listaTareas = mutableListOf()
+                }
                 if (!usuario.listaTareas?.isEmpty()!!) {
-                    for (lista in usuario.listaTareas!!) {
-                        listas(lista)
+                    usuario.listaTareas!!.forEachIndexed { index, lista ->
+                        listas(lista, sharedViewModel, navController, usuario, index)
                     }
+                    /*for (lista in usuario.listaTareas!!) {
+                        listas(lista, sharedViewModel, navController, usuario)
+                    }*/
                 }
             }
         }
@@ -88,12 +96,23 @@ fun contenido(usuario: Usuario?) {
 }
 
 @Composable
-fun listas(lista: ListaTareas) {
+fun listas(
+    lista: ListaTareas,
+    sharedViewModel: SharedViewModel,
+    navController: NavController,
+    usuario: Usuario?,
+    index: Int
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp)
-            .clickable { /*TODO*/ },
+            .clickable {
+                sharedViewModel.addUsuario(usuario!!)
+                sharedViewModel.addListaTareas(lista)
+                sharedViewModel.addIndex(index)
+                navController.navigate(AppPantallas.ListaDeTareas.ruta)
+            },
         backgroundColor = MaterialTheme.colors.surface,
         elevation = 10.dp
     ) {
@@ -110,6 +129,7 @@ fun listas(lista: ListaTareas) {
 @Composable
 fun crearLista(openDialog: MutableState<Boolean>, usuario: Usuario?, context: Context) {
     var nombreLista by remember { mutableStateOf("") }
+    var estadoLista by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = { openDialog.value = false },
@@ -146,6 +166,7 @@ fun crearLista(openDialog: MutableState<Boolean>, usuario: Usuario?, context: Co
                         openDialog.value = false
                         usuario?.listaTareas?.add(ListaTareas(nombreLista))
                         escribirDatosUsuario(usuario!!)
+                        estadoLista = true
                         Toast.makeText(context, "Lista creada", Toast.LENGTH_SHORT).show()
                     } else {
                         Toast.makeText(context, "Campo vacío", Toast.LENGTH_SHORT).show()
@@ -154,6 +175,10 @@ fun crearLista(openDialog: MutableState<Boolean>, usuario: Usuario?, context: Co
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
             ) {
                 Text(text = "CONFIRMAR", color = MaterialTheme.colors.onSecondary)
+                if (estadoLista) {
+
+                }
+                estadoLista = false
             }
         },
         dismissButton = {
