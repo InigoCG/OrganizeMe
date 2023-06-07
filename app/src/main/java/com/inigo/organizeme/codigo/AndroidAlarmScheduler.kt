@@ -39,8 +39,6 @@ class AndroidAlarmScheduler(
         var calendar: Calendar = Calendar.getInstance()
         calendar.time = date*/
 
-        println("esta es la fecha -> " + item.fecha)
-
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
             timeInMillis,

@@ -25,7 +25,6 @@ class AlarmReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val titulo = intent.getStringExtra("titulo")
         val mensaje = intent.getStringExtra("mensaje")
-        println("probando $titulo")
 
         buildNotification(context, titulo!!, mensaje!!)
     }

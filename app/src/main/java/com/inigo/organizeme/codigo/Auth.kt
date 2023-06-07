@@ -132,6 +132,41 @@ fun escribirDatosUsuario(datosUsuario: Usuario) {
     }
 }
 
+fun actualizarDatosUsuario(datosUsuario: Usuario) {
+    try {
+        db =
+            FirebaseDatabase.getInstance("https://tfginigocarrate-default-rtdb.europe-west1.firebasedatabase.app").reference
+
+        val usuario = Usuario(
+            datosUsuario.email?.trim(),
+            datosUsuario.nombre?.trim(),
+            datosUsuario.listaTareas
+        )
+
+        db.child("usuarios").child(usuario.email!!.replace('.', '-')).setValue(usuario)
+    } catch (exception: Exception) {
+        //TODO Hacer un cambio de actividad o un Toast
+    }
+}
+
+fun eliminarDatosUsuario(datosUsuario: Usuario, index: Int) {
+    try {
+        db =
+            FirebaseDatabase.getInstance("https://tfginigocarrate-default-rtdb.europe-west1.firebasedatabase.app").reference
+
+        val usuario = Usuario(
+            datosUsuario.email?.trim(),
+            datosUsuario.nombre?.trim(),
+            datosUsuario.listaTareas
+        )
+
+        db.child("usuarios").child(usuario.email!!.replace('.', '-')).child("listaTareas")
+            .child(index.toString()).removeValue()
+    } catch (exception: Exception) {
+        //TODO Hacer un cambio de actividad o un Toast
+    }
+}
+
 fun escribirDatosListaTareas(datosUsuario: Usuario, listaTareas: ListaTareas, index: Int) {
     try {
         db =
@@ -150,34 +185,20 @@ fun escribirDatosListaTareas(datosUsuario: Usuario, listaTareas: ListaTareas, in
     }
 }
 
-/*fun leerTarea(
-    datosUsuario: Usuario,
-    indexLista: Int,
-    indexTarea: Int
-): Tarea {
-    var tarea = Tarea("","", "")
-
+fun eliminarTarea(datosUsuario: Usuario, listaTareas: ListaTareas, index: Int, indexTarea: Int) {
     try {
         db =
             FirebaseDatabase.getInstance("https://tfginigocarrate-default-rtdb.europe-west1.firebasedatabase.app").reference
+
         val usuario = Usuario(
             datosUsuario.email?.trim(),
             datosUsuario.nombre?.trim(),
             datosUsuario.listaTareas
         )
+
         db.child("usuarios").child(usuario.email!!.replace('.', '-')).child("listaTareas")
-            .child(indexLista.toString()).child("tareas").child(indexTarea.toString()).get()
-            .addOnSuccessListener {
-                val map: HashMap<String, Any> = it.value as HashMap<String, Any>
-                tarea = Tarea(
-                    map.get("nombre").toString(),
-                    map.get("descripcion").toString(),
-                    map.get("fecha").toString()
-                )
-            }
+            .child(index.toString()).child("tareas").child(indexTarea.toString()).removeValue()
     } catch (exception: Exception) {
         //TODO Hacer un cambio de actividad o un Toast
-        System.err.println("Ha habido un error")
     }
-    return tarea
-}*/
+}

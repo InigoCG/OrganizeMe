@@ -32,5 +32,11 @@ fun AppNavegacion() {
         composable(route = AppPantallas.ListaDeTareas.ruta) {
             ListaDeTareas(navController, sharedViewModel)
         }
+        composable(route = AppPantallas.Info.ruta) {
+            Info(navController = navController)
+        }
+        composable(route = AppPantallas.Configuracion.ruta) {
+            ConfiguracionListaTareas(navController, sharedViewModel)
+        }
     }
 }

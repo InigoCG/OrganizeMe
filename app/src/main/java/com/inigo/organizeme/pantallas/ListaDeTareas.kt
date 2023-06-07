@@ -45,6 +45,7 @@ import com.inigo.organizeme.codigo.MenuItem
 import com.inigo.organizeme.codigo.SharedViewModel
 import com.inigo.organizeme.codigo.Tarea
 import com.inigo.organizeme.codigo.Usuario
+import com.inigo.organizeme.codigo.eliminarTarea
 import com.inigo.organizeme.codigo.escribirDatosListaTareas
 import com.inigo.organizeme.navegacion.AppPantallas
 import com.inigo.organizeme.navegacion.DrawerBody
@@ -61,6 +62,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Formatter
 
 @Composable
 fun ListaDeTareas(
@@ -140,6 +142,17 @@ fun ListaDeTareas(
                             "cerrar_sesion" -> {
                                 navController.popBackStack()
                                 navController.navigate(AppPantallas.Login.ruta)
+                            }
+
+                            "info" -> {
+                                navController.navigate(AppPantallas.Info.ruta)
+                            }
+
+                            "configuracion" -> {
+                                sharedViewModel.addListaTareas(listaTareas!!)
+                                sharedViewModel.addUsuario(usuario!!)
+                                sharedViewModel.addIndex(index)
+                                navController.navigate(AppPantallas.Configuracion.ruta)
                             }
                         }
                     }
@@ -243,7 +256,6 @@ fun listasDeTareas(
             }, backgroundColor = MaterialTheme.colors.surface, elevation = 10.dp
     ) {
         if (openDialog.value && aux == indexTarea) {
-            System.err.println("indice " + indexTarea)
             GestionarTarea(
                 openDialog = openDialog,
                 context = context,
@@ -494,6 +506,9 @@ fun GestionarTarea(
     tarea: Tarea,
     navController: NavController
 ) {
+    val localDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    val fechaInicial: LocalDateTime = LocalDateTime.parse(tarea.fecha, localDateTimeFormatter)
+
     var nombreTarea by remember { mutableStateOf(tarea.nombre) }
     var descripcionTarea by remember { mutableStateOf(tarea.descripcion) }
 
@@ -503,7 +518,7 @@ fun GestionarTarea(
     val focusManager = LocalFocusManager.current
 
     var pickedDate by remember {
-        mutableStateOf(LocalDate.now())
+        mutableStateOf(fechaInicial.toLocalDate())
     }
     val formatterDate by remember {
         derivedStateOf {
@@ -511,7 +526,7 @@ fun GestionarTarea(
         }
     }
     var pickedTime by remember {
-        mutableStateOf(LocalTime.NOON)
+        mutableStateOf(fechaInicial.toLocalTime())
     }
     val formatterTime by remember {
         derivedStateOf {
@@ -524,172 +539,189 @@ fun GestionarTarea(
 
     var alarmItem: AlarmItem? = null
 
-    AlertDialog(onDismissRequest = { openDialog.value = false }, title = {
-        Text(
-            text = "Crear Tarea",
-            color = MaterialTheme.colors.onBackground,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }, text = {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            TextField(
-                value = nombreTarea!!,
-                onValueChange = { nombreTarea = it },
-                label = {
-                    Text(
-                        text = "Nombre", color = MaterialTheme.colors.onBackground
-                    )
-                },
-                modifier = Modifier.background(MaterialTheme.colors.onSecondary),
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = MaterialTheme.colors.primaryVariant,
-                    cursorColor = MaterialTheme.colors.primaryVariant,
-                    textColor = MaterialTheme.colors.onBackground
-                ),
-                singleLine = true,
-                keyboardActions = KeyboardActions(onDone = {
-                    focusManager.clearFocus()
-                })
+    AlertDialog(
+        onDismissRequest = { openDialog.value = false }, title = {
+            Text(
+                text = "Crear Tarea",
+                color = MaterialTheme.colors.onBackground,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.padding(bottom = 5.dp))
-            TextField(
-                value = descripcionTarea!!,
-                onValueChange = { descripcionTarea = it },
-                label = {
-                    Text(
-                        text = "Descripción", color = MaterialTheme.colors.onBackground
-                    )
-                },
-                modifier = Modifier.background(MaterialTheme.colors.onSecondary),
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = MaterialTheme.colors.primaryVariant,
-                    cursorColor = MaterialTheme.colors.primaryVariant,
-                    textColor = MaterialTheme.colors.onBackground
-                ),
-                singleLine = true,
-                keyboardActions = KeyboardActions(onDone = {
-                    focusManager.clearFocus()
-                })
-            )
-            Spacer(modifier = Modifier.padding(bottom = 15.dp))
-            Button(onClick = {
-                dateDialogState.show()
-            }) {
-                Text(text = "Selecciona una fecha", color = MaterialTheme.colors.onSecondary)
-            }
-            Text(text = formatterDate, color = MaterialTheme.colors.onBackground)
-            Spacer(modifier = Modifier.padding(bottom = 10.dp))
-            Button(onClick = {
-                timeDialogState.show()
-            }) {
-                Text(text = "Selecciona una hora", color = MaterialTheme.colors.onSecondary)
-            }
-            Text(text = formatterTime, color = MaterialTheme.colors.onBackground)
-        }
-
-        MaterialDialog(dialogState = dateDialogState, properties = DialogProperties(
-            dismissOnBackPress = true, dismissOnClickOutside = true
-        ), backgroundColor = MaterialTheme.colors.onSecondary, buttons = {
-            positiveButton(text = "CONFIRMAR") {
-                fechaElegida = true
-                Toast.makeText(context, "fecha asignada", Toast.LENGTH_SHORT).show()
-            }
-            negativeButton(text = "CANCELAR")
-        }) {
-            datepicker(
-                initialDate = LocalDate.now(),
-                title = "FECHA",
-                colors = DatePickerDefaults.colors(
-                    headerBackgroundColor = MaterialTheme.colors.primaryVariant,
-                    headerTextColor = MaterialTheme.colors.onSecondary,
-                    dateActiveBackgroundColor = MaterialTheme.colors.primary,
-                    dateActiveTextColor = MaterialTheme.colors.onSecondary,
-                    dateInactiveTextColor = MaterialTheme.colors.onBackground,
-                    calendarHeaderTextColor = MaterialTheme.colors.primary
+        }, text = {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                TextField(
+                    value = nombreTarea!!,
+                    onValueChange = { nombreTarea = it },
+                    label = {
+                        Text(
+                            text = "Nombre", color = MaterialTheme.colors.onBackground
+                        )
+                    },
+                    modifier = Modifier.background(MaterialTheme.colors.onSecondary),
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = MaterialTheme.colors.primaryVariant,
+                        cursorColor = MaterialTheme.colors.primaryVariant,
+                        textColor = MaterialTheme.colors.onBackground
+                    ),
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.clearFocus()
+                    })
                 )
+                Spacer(modifier = Modifier.padding(bottom = 5.dp))
+                TextField(
+                    value = descripcionTarea!!,
+                    onValueChange = { descripcionTarea = it },
+                    label = {
+                        Text(
+                            text = "Descripción", color = MaterialTheme.colors.onBackground
+                        )
+                    },
+                    modifier = Modifier.background(MaterialTheme.colors.onSecondary),
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = MaterialTheme.colors.primaryVariant,
+                        cursorColor = MaterialTheme.colors.primaryVariant,
+                        textColor = MaterialTheme.colors.onBackground
+                    ),
+                    singleLine = true,
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.clearFocus()
+                    })
+                )
+                Spacer(modifier = Modifier.padding(bottom = 15.dp))
+                Button(onClick = {
+                    dateDialogState.show()
+                }) {
+                    Text(text = "Selecciona una fecha", color = MaterialTheme.colors.onSecondary)
+                }
+                Text(text = formatterDate, color = MaterialTheme.colors.onBackground)
+                Spacer(modifier = Modifier.padding(bottom = 10.dp))
+                Button(onClick = {
+                    timeDialogState.show()
+                }) {
+                    Text(text = "Selecciona una hora", color = MaterialTheme.colors.onSecondary)
+                }
+                Text(text = formatterTime, color = MaterialTheme.colors.onBackground)
+            }
+
+            MaterialDialog(dialogState = dateDialogState, properties = DialogProperties(
+                dismissOnBackPress = true, dismissOnClickOutside = true
+            ), backgroundColor = MaterialTheme.colors.onSecondary, buttons = {
+                positiveButton(text = "CONFIRMAR") {
+                    fechaElegida = true
+                    Toast.makeText(context, "fecha asignada", Toast.LENGTH_SHORT).show()
+                }
+                negativeButton(text = "CANCELAR")
+            }) {
+                datepicker(
+                    initialDate = LocalDate.now(),
+                    title = "FECHA",
+                    colors = DatePickerDefaults.colors(
+                        headerBackgroundColor = MaterialTheme.colors.primaryVariant,
+                        headerTextColor = MaterialTheme.colors.onSecondary,
+                        dateActiveBackgroundColor = MaterialTheme.colors.primary,
+                        dateActiveTextColor = MaterialTheme.colors.onSecondary,
+                        dateInactiveTextColor = MaterialTheme.colors.onBackground,
+                        calendarHeaderTextColor = MaterialTheme.colors.primary
+                    )
+                ) {
+                    pickedDate = it
+                }
+            }
+            MaterialDialog(dialogState = timeDialogState, properties = DialogProperties(
+                dismissOnBackPress = true, dismissOnClickOutside = true
+            ), backgroundColor = MaterialTheme.colors.onSecondary, buttons = {
+                positiveButton(text = "CONFIRMAR") {
+                    horaElegida = true
+                    Toast.makeText(context, "Hora asignada", Toast.LENGTH_SHORT).show()
+                }
+                negativeButton(text = "CANCELAR")
+            }) {
+                timepicker(
+                    initialTime = LocalTime.NOON,
+                    title = "HORA",
+                    colors = TimePickerDefaults.colors(
+                        activeTextColor = MaterialTheme.colors.onSecondary,
+                        activeBackgroundColor = MaterialTheme.colors.primary,
+                        inactiveBackgroundColor = MaterialTheme.colors.primaryVariant,
+                        inactiveTextColor = MaterialTheme.colors.onSecondary,
+                        selectorTextColor = MaterialTheme.colors.onSecondary,
+                        inactivePeriodBackground = MaterialTheme.colors.secondary,
+                        selectorColor = MaterialTheme.colors.primary
+                    ),
+                    is24HourClock = true
+                ) {
+                    pickedTime = it
+                }
+            }
+        }, confirmButton = {
+            Button(
+                onClick = {
+                    if (comprobarNombreLista(nombreTarea!!) && fechaElegida && horaElegida) {
+                        openDialog.value = false
+                        fechaElegida = false
+                        horaElegida = false
+
+                        val fecha: LocalDate = LocalDate.parse(formatterDate)
+                        val hora: LocalTime = LocalTime.parse(formatterTime)
+                        val tiempo: LocalDateTime = LocalDateTime.of(fecha, hora)
+                        val formatter: DateTimeFormatter =
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                        val tiempoFormateado: String = tiempo.format(formatter)
+
+                        listaTareas.tareas?.set(
+                            indexTarea, Tarea(nombreTarea, descripcionTarea, tiempoFormateado)
+                        )
+                        escribirDatosListaTareas(usuario, listaTareas, indexLista)
+
+                        val scheduler = AndroidAlarmScheduler(context, tiempo)
+
+                        alarmItem = AlarmItem(
+                            fecha = tiempo,
+                            titulo = tarea.nombre!!,
+                            mensaje = tiempoFormateado
+                        )
+                        alarmItem?.let(scheduler::schedule)
+
+                        Toast.makeText(context, "Tarea editada", Toast.LENGTH_SHORT).show()
+
+                        navController.popBackStack()
+                        navController.navigate(AppPantallas.ListaDeTareas.ruta)
+                    } else {
+                        Toast.makeText(context, "Campo vacío", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
             ) {
-                pickedDate = it
+                Text(text = "CONFIRMAR", color = MaterialTheme.colors.onSecondary)
             }
-        }
-        MaterialDialog(dialogState = timeDialogState, properties = DialogProperties(
-            dismissOnBackPress = true, dismissOnClickOutside = true
-        ), backgroundColor = MaterialTheme.colors.onSecondary, buttons = {
-            positiveButton(text = "CONFIRMAR") {
-                horaElegida = true
-                Toast.makeText(context, "Hora asignada", Toast.LENGTH_SHORT).show()
-            }
-            negativeButton(text = "CANCELAR")
-        }) {
-            timepicker(
-                initialTime = LocalTime.NOON,
-                title = "HORA",
-                colors = TimePickerDefaults.colors(
-                    activeTextColor = MaterialTheme.colors.onSecondary,
-                    activeBackgroundColor = MaterialTheme.colors.primary,
-                    inactiveBackgroundColor = MaterialTheme.colors.primaryVariant,
-                    inactiveTextColor = MaterialTheme.colors.onSecondary,
-                    selectorTextColor = MaterialTheme.colors.onSecondary,
-                    inactivePeriodBackground = MaterialTheme.colors.secondary,
-                    selectorColor = MaterialTheme.colors.primary
-                ),
-                is24HourClock = true
-            ) {
-                pickedTime = it
-            }
-        }
-    }, confirmButton = {
-        Button(
-            onClick = {
-                if (comprobarNombreLista(nombreTarea!!) && fechaElegida && horaElegida) {
+            Button(
+                onClick = {
                     openDialog.value = false
-                    fechaElegida = false
-                    horaElegida = false
 
-                    val fecha: LocalDate = LocalDate.parse(formatterDate)
-                    val hora: LocalTime = LocalTime.parse(formatterTime)
-                    val tiempo: LocalDateTime = LocalDateTime.of(fecha, hora)
-                    val formatter: DateTimeFormatter =
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-                    val tiempoFormateado: String = tiempo.format(formatter)
+                    listaTareas.tareas?.remove(tarea)
+                    eliminarTarea(usuario, listaTareas, indexLista, indexTarea)
 
-                    listaTareas.tareas?.set(
-                        indexTarea, Tarea(nombreTarea, descripcionTarea, tiempoFormateado)
-                    )
-                    escribirDatosListaTareas(usuario, listaTareas, indexLista)
-
-                    val scheduler = AndroidAlarmScheduler(context, tiempo)
-
-                    alarmItem = AlarmItem(
-                        fecha = tiempo,
-                        titulo = tarea.nombre!!,
-                        mensaje = tiempoFormateado
-                    )
-                    alarmItem?.let(scheduler::schedule)
-
-                    Toast.makeText(context, "Tarea editada", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Tarea eliminada", Toast.LENGTH_SHORT).show()
 
                     navController.popBackStack()
                     navController.navigate(AppPantallas.ListaDeTareas.ruta)
-                } else {
-                    Toast.makeText(context, "Campo vacío", Toast.LENGTH_SHORT).show()
-                }
-            },
-            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
-        ) {
-            Text(text = "CONFIRMAR", color = MaterialTheme.colors.onSecondary)
-        }
-    }, dismissButton = {
-        Button(
-            onClick = { openDialog.value = false },
-            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
-        ) {
-            Text(text = "CANCELAR", color = MaterialTheme.colors.onSecondary)
-        }
-    }, backgroundColor = MaterialTheme.colors.onSecondary
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
+            ) {
+                Text(text = "ELMINAR", color = MaterialTheme.colors.onSecondary)
+            }
+        }, dismissButton = {
+            Button(
+                onClick = { openDialog.value = false },
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
+            ) {
+                Text(text = "CANCELAR", color = MaterialTheme.colors.onSecondary)
+            }
+        }, backgroundColor = MaterialTheme.colors.onSecondary
     )
 }

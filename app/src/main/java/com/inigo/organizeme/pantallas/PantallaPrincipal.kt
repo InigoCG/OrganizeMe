@@ -79,6 +79,9 @@ fun PantallaPrincipal(navController: NavController, sharedViewModel: SharedViewM
                                 navController.popBackStack()
                                 navController.navigate(AppPantallas.Login.ruta)
                             }
+                            "info" -> {
+                                navController.navigate(AppPantallas.Info.ruta)
+                            }
                         }
                     }
                 )
