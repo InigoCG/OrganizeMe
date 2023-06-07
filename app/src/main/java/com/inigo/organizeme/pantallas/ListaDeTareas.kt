@@ -316,7 +316,7 @@ fun TareaAdd(
     }
     val formatterTime by remember {
         derivedStateOf {
-            DateTimeFormatter.ofPattern("hh:mm").format(pickedTime)
+            DateTimeFormatter.ofPattern("HH:mm").format(pickedTime)
         }
     }
 

@@ -100,7 +100,7 @@ fun Info(navController: NavController) {
                 val agradecimientos = listOf(
                     "A Ricardo por la ayuda brindada durante la elaboración del proyecto.",
                     "A mis compañeros de empresa; Sierro, Peña, Dani y Rafa por su apoyo y atención diarios.",
-                    "A mi novia por la elaboración del logo de la aplicación y su apoyo incondicional en todo momento.",
+                    "A mi novia Cris por la elaboración del logo de la aplicación y su apoyo incondicional en todo momento.",
                     "Y a mi familia por estar ahí siempre que lo he necesitado."
                 )
                 Spacer(modifier = Modifier.padding(top = 15.dp))
