@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -38,6 +40,8 @@ fun ContenidoLogin(navController: NavController, sharedViewModel: SharedViewMode
     var password by remember { mutableStateOf("") }
 
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+
+    val focusManager = LocalFocusManager.current
 
     OrganizeMeTheme {
         Column(
@@ -73,7 +77,11 @@ fun ContenidoLogin(navController: NavController, sharedViewModel: SharedViewMode
                         colors = TextFieldDefaults.textFieldColors(
                             focusedIndicatorColor = MaterialTheme.colors.primaryVariant,
                             cursorColor = MaterialTheme.colors.primaryVariant
-                        )
+                        ),
+                        singleLine = true,
+                        keyboardActions = KeyboardActions(onDone = {
+                            focusManager.clearFocus()
+                        })
                     )
                 }
                 Column(
@@ -96,6 +104,9 @@ fun ContenidoLogin(navController: NavController, sharedViewModel: SharedViewMode
                             focusedIndicatorColor = MaterialTheme.colors.primaryVariant,
                             cursorColor = MaterialTheme.colors.primaryVariant
                         ),
+                        keyboardActions = KeyboardActions(onDone = {
+                            focusManager.clearFocus()
+                        }),
                         singleLine = true,
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),

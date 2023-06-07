@@ -8,7 +8,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,7 +21,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.inigo.organizeme.codigo.*
 import com.inigo.organizeme.navegacion.AppPantallas
+import com.inigo.organizeme.navegacion.DrawerBody
+import com.inigo.organizeme.navegacion.DrawerHeader
 import com.inigo.organizeme.ui.theme.OrganizeMeTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun PantallaPrincipal(navController: NavController, sharedViewModel: SharedViewModel) {
@@ -28,38 +33,73 @@ fun PantallaPrincipal(navController: NavController, sharedViewModel: SharedViewM
     val usuario = sharedViewModel.usuario
     val openDialog = remember { mutableStateOf(false) }
 
+
     OrganizeMeTheme {
-        Scaffold(topBar = {
-            TopAppBar(backgroundColor = MaterialTheme.colors.primaryVariant) {
-                Icon(
-                    Icons.Filled.Menu,
-                    contentDescription = "Menu",
-                    modifier = Modifier.size(30.dp),
-                    tint = MaterialTheme.colors.onSecondary
+        val scaffoldState = rememberScaffoldState()
+        val scope = rememberCoroutineScope()
+
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                AppBar(
+                    nombre = usuario?.nombre.toString(),
+                    onNavigationIconClick = {
+                        scope.launch {
+                            scaffoldState.drawerState.open()
+                        }
+                    }
                 )
-                Text(
-                    modifier = Modifier.padding(start = 10.dp),
-                    fontSize = 20.sp,
-                    text = "${usuario?.nombre}",
-                    color = MaterialTheme.colors.onSecondary
+            },
+            drawerContent = {
+                DrawerHeader(nombre = usuario?.nombre.toString())
+                DrawerBody(
+                    items = listOf(
+                        MenuItem(
+                            id = "configuracion",
+                            title = "Configuración",
+                            description = "Ir a configuración",
+                            icon = Icons.Default.Settings
+                        ),
+                        MenuItem(
+                            id = "info",
+                            title = "Info",
+                            description = "Ir a información",
+                            icon = Icons.Default.Info
+                        ),
+                        MenuItem(
+                            id = "cerrar_sesion",
+                            title = "Cerrar Sesión",
+                            description = "Cierra la sesión del usuario",
+                            icon = Icons.Default.Logout
+                        )
+                    ),
+                    onItemClick = {
+                        when (it.id) {
+                            "cerrar_sesion" -> {
+                                navController.popBackStack()
+                                navController.navigate(AppPantallas.Login.ruta)
+                            }
+                        }
+                    }
                 )
-            }
-        }, floatingActionButton = {
-            FloatingActionButton(
-                backgroundColor = MaterialTheme.colors.primary,
-                contentColor = MaterialTheme.colors.onSecondary,
-                onClick = {
-                    openDialog.value = true
-                }) {
-                if (openDialog.value) {
-                    crearLista(openDialog, usuario, context)
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    backgroundColor = MaterialTheme.colors.primary,
+                    contentColor = MaterialTheme.colors.onSecondary,
+                    onClick = {
+                        openDialog.value = true
+                    }) {
+                    if (openDialog.value) {
+                        crearLista(openDialog, usuario, context, navController)
+                    }
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Crear lista de tareas"
+                    )
                 }
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Crear lista de tareas"
-                )
-            }
-        }, floatingActionButtonPosition = FabPosition.End) {
+            }, floatingActionButtonPosition = FabPosition.End
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -127,7 +167,12 @@ fun listas(
 }
 
 @Composable
-fun crearLista(openDialog: MutableState<Boolean>, usuario: Usuario?, context: Context) {
+fun crearLista(
+    openDialog: MutableState<Boolean>,
+    usuario: Usuario?,
+    context: Context,
+    navController: NavController
+) {
     var nombreLista by remember { mutableStateOf("") }
     var estadoLista by remember { mutableStateOf(false) }
 
@@ -168,6 +213,9 @@ fun crearLista(openDialog: MutableState<Boolean>, usuario: Usuario?, context: Co
                         escribirDatosUsuario(usuario!!)
                         estadoLista = true
                         Toast.makeText(context, "Lista creada", Toast.LENGTH_SHORT).show()
+
+                        navController.popBackStack()
+                        navController.navigate(AppPantallas.PantallaPrincipal.ruta)
                     } else {
                         Toast.makeText(context, "Campo vacío", Toast.LENGTH_SHORT).show()
                     }
